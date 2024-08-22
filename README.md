@@ -1,5 +1,7 @@
 ## Decode-MOT: How Can We Hurdle Frames to Go Beyond Tracking-by-Detection
 
+
+
 A novel **decision coordinator for MOT (Decode-MOT)** which can determine the best tracking-by-detection or tracking-by-motion mechanism.
 Decode-MOT mainly consists of **the decision coordinator, the scene and tracking contextual learning, and the hierarchical confidence association**.
 
@@ -7,9 +9,9 @@ Decode-MOT mainly consists of **the decision coordinator, the scene and tracking
 
 ## Abstract
 
-The speed of tracking-by-detection (TBD) greatly depends on the number of running a detector because the detection is the most expensive operation in TBD. In many practical cases, multi-object tracking (MOT) can be, however, achieved based tracking-by-motion (TBM) only. This is a possible solution without much loss of MOT accuracy when the variations of object cardinality and motions are not much within consecutive frames. Therefore, the MOT problem can be transformed to find the best TBD and TBM mechanism.
+The speed of tracking-by-detection (TBD) greatly depends on the number of running a detector because the detection is the most expensive operation in TBD. In many practical cases, multi-object tracking (MOT) can be, however, achieved based tracking-by-motion (TBM) only. This is a possible solution without much loss of MOT accuracy when the variations of object cardinality and motions are not much within consecutive frames. Therefore, the MOT problem can be transformed to find the best TBD and TBM mechanism. 
 
-To achieve it, we propose a novel decision coordinator for MOT (Decode-MOT) which can determine the best  TBD/TBM mechanism  according to scene and tracking contexts. In specific, our Decode-MOT learns tracking and scene contextual similarities between frames. Because the contextual similarities can vary significantly according to the used trackers and tracking scenes,  we learn the Decode-MOT via self-supervision. The evaluation results on MOT  challenge datasets prove that our method can boost the tracking speed greatly while keeping the state-of-the-art MOT accuracy.
+To achieve it, we propose a novel decision coordinator for MOT (Decode-MOT) which can determine the best TBD/TBM mechanism according to scene and tracking contexts. In specific, our Decode-MOT learns tracking and scene contextual similarities between frames. Because the contextual similarities can vary significantly according to the used trackers and tracking scenes, we learn the Decode-MOT via self-supervision. The evaluation results on MOT challenge datasets prove that our method can boost the tracking speed greatly while keeping the state-of-the-art MOT accuracy.
 
 ### Highlights
 
@@ -115,12 +117,105 @@ To achieve it, we propose a novel decision coordinator for MOT (Decode-MOT) whic
 </tbody>
 </table>
 
-* For MOTChallenge test, we use a single Titan Xp to run the Decode-MOT
+## Installation and Data Preparation
+
+We recommend to refer to <a href="https://github.com/ifzhang/FairMOT">FairMOT</a>.<br>
+Also, place MOTChallenge datasets in order to exploit Decode-MOT as below:
+
+```
+data/
+    MOT15/
+	images/
+            train/
+	    test/
+    MOT17/
+        images/
+	    train/
+	    test/
+        labels_with_ids/
+    MOT20/
+        images/
+	    train/
+	    test/
+```
+
+## Training
+
+Because Decode-MOT trains only the decision head, it requires a pre-trained tracker.  
+Therefore, we provide <a href="https://drive.google.com/file/d/1qbWbNMJ02-OcWId-l4blgaWWvL1_2YWC/view?usp=drive_link">baseline tracker</a> trained with MOT17, which can be available as a baseline.  
+In order to train Decode-MOT, you can refer below following:  
+
+```bash
+python train.py \
+        mot_sche \
+        --freeze_detector \
+	--add_decision_head \
+	--add_attention \
+	--gpus 1 \
+	--num_workers 0 \
+	--batch_size 6 \ # Do not change the parameter
+	--lr 0.00005 \
+	--exp_id {Experiment Name} \
+	--load_model {your/detector/weight/path.pth} \
+	--data_cfg lib/cfg/custom/mot17_exceptMOT17-09.json \
+```
 
 
-## Qualitative Results
+## Evaluation
 
-### Tracking Results
+We provide the evaluation model <a href="https://drive.google.com/file/d/17s-fBVZ7mS88tQs2yCSJaxBVQprGEweV/view?usp=drive_link">weight file</a> for MOT17. 
+To eval the model, you can refer below following.
 
-<p align="center"> <img src='Figures/TUD-Stadtmitte.gif' align="center" width="320px"> <img src='Figures/TUD-Crossing.gif' align="center" width="320px"> </p>
-<p align="center"> <img src='Figures/MOT16-03.gif' align="center" width="320px"> <img src='Figures/MOT16-12.gif' align="center" width="320px"> </p>
+* MOT17
+```bash
+python track.py \
+        --mot_sche \
+        --add_decision_head \
+        --add_attention \
+        --exp_id {Experiment Name} \
+	--test_mot17 True 
+        --load_model {path/to/the/model.pth} \
+        --data_dir ../data
+```
+
+* MOT20
+```bash
+ python track.py \
+        --mot_sche \
+        --add_decision_head \
+        --add_attention \
+        --exp_id {Experiment Name} \
+	--test_mot20 True \ 
+        --load_model {path/to/the/model.pth} \
+        --data_dir ../data
+```
+
+## Tracking Results
+
+<p align="center"> <img src='Figures/TUD-Stadtmitte.gif' align="center" width="270px"> <img src='Figures/TUD-Crossing.gif' align="center" width="270px"> 
+<img src='Figures/MOT16-12.gif' align="center" width="270px"> </p>
+
+## Citation
+Please cite our paper if you find this repo helpful:
+
+```BibTeX
+@article{lee2023decode,
+title = {Decode-MOT: How can we hurdle frames to go beyond tracking-by-detection?},
+journal = {IEEE Transactions on Image Processing},
+volume = {32},
+pages = {4378-4392},
+year = {2023},
+issn = {1057-7149},
+doi = {https://doi.org/10.1109/TIP.2023.3298538},
+url = {https://ieeexplore.ieee.org/abstract/document/10197341},
+author = {Seong-Ho Lee, Dae-Hyeon Park and Seung-Hwan Bae}
+}
+```
+
+## LICENSE
+This project is licensed under CC BY-NC 4.0 license. Redistribution and use of the code for non-commercial purposes should follow this license.
+
+## Thanks to
+
+We referred below codes to conduct these experiments.
+* [FairMOT](https://github.com/ifzhang/FairMOT)

@@ -1,0 +1,15 @@
+{
+    "root":"../data",
+    "train":
+    {
+        "mot17":"./data/custom/mot17_exceptMOT17-09.train"
+    },
+    "test_emb":
+    {
+        "mot17":"./data/custom/mot17_exceptMOT17-09.train"
+    },
+    "test":
+    {
+        "mot17":"./data/custom/mot17_exceptMOT17-09.train"
+    }
+}
